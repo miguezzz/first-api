@@ -10,7 +10,7 @@ Este projeto é uma API simples criada utilizando Node.js puro, sem o uso de fra
 
 1. Clone o repositório:
   ```bash
-  git clone https://github.com/miguezzz/first-api.git
+  git clone git@github.com:miguezzz/first-api.git
   ```
 2. Navegue até o diretório do projeto:
   ```bash
@@ -78,16 +78,6 @@ Adiciona um novo usuário.
   "id": 3,
   "name": "Novo Usuário"
 }
-```
-
-## Estrutura do Projeto
-
-```
-first-api/
-├── src/
-│   └── index.js
-├── 
-└── README.md
 ```
 
 ## Licença
