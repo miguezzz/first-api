@@ -1,17 +1,21 @@
-// Importa o módulo http
+// Importa o módulo http e url
 const http = require('http');
 const url = require('url');
 
+// importa o arquivo de rotas
 const routes = require('./routes');
 
 // Cria o server
 const server = http.createServer((request, response) => {
-  console.log(`Request method: ${request.method} | Endpoint: ${request.url}`);
+  const parsedUrl = url.parse(request.url, true); // pega a url da requisição e transforma em um objeto dividido em partes. O objeto retornado possui várias propriedades, como pathname, query, path, entre outras. o true no parâmetro faz com que a query string seja transformada em um objeto, facilitando a leitura dos parâmetros passados na URL.
 
-  const route = routes.find((routeObj) => (
-    routeObj.method === request.method && routeObj.endpoint === request.url
+  console.log(`Request method: ${request.method} | Endpoint: ${request.url}`);
+  
+  const route = routes.find((routeObj) => ( // vai varrer o array de objetos em busca da rota desejada
+    routeObj.method === request.method && routeObj.endpoint === parsedUrl.pathname
   ));
-  if (route) { // se ncontrar o endpoint desejado com o método correto, executa o handler definido no UserController.js
+  if (route) { // se encontrar o endpoint desejado com o método correto, executa o handler definido no UserController.js
+    request.query = parsedUrl.query; // injeta parsedUrl.query no objeto request, para que o handler possa acessar os parâmetros passados na URL
     route.handler(request, response);
   } else {
     response.writeHead(404, { 'Content-Type': 'text/html' });
