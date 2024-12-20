@@ -1,6 +1,6 @@
 // a regra de negócio da aplicação foi transferida para o arquivo UserController.js, que agora é responsável por lidar com as requisições e respostas da aplicação. O arquivo index.js agora é responsável apenas por criar o servidor e escutar a porta 3000.
 
-const users = require("../mocks/users");
+let users = require("../mocks/users");
 
 module.exports = {
   listUsers(request, response) {
@@ -31,25 +31,43 @@ module.exports = {
   },
 
   createUser(request, response) {
-    let body = '';
+    const { body } = request;
 
-    // criaremos um event listener para o evento data, que é disparado toda vez que um novo chunk de dados é recebido (forma como os dados são enviados no método POST)
-    request.on('data', (chunk) => {
-      body += chunk; // concatena os chunks de dados recebidos
+    console.log(body);
+
+    const lastUserId = users[users.length - 1].id; // pega o último id da lista de usuários
+    const newUser = {
+      id: lastUserId + 1, // incrementa o id do último usuário
+      name: body.name,
+    };
+    users.push(newUser);
+
+    response.send(200, newUser); // resposta da requisição com o status 200 e uma mensagem de sucesso
+  },
+
+  updateUser(request, response) {
+    let { id } = request.params;
+    const { name } = request.body;
+
+    id = Number(id);
+
+    const userExists = users.find((user) => user.id === id);
+
+    if (!userExists) {
+      response.send(400, { error: "User not found" });
+    }
+
+    users = users.map((user) => { // para cada usuário, verifica se o id é igual ao id passado na URL.
+      if (user.id === id) {
+        return { // se for igual, retorna um novo objeto com o id e o name atualizado
+          ...user, // spread operator para manter as propriedades do usuário
+          name, // atualiza o name
+        };
+      }
+
+      return user; // se não for igual, retorna o usuário sem alterações
     });
 
-    // criaremos um event listener para o evento end, que é disparado quando todos os dados foram recebidos da stream
-    request.on('end', () => {
-      body = JSON.parse(body); // manda a string de dados para o JSON.parse para transformá-la em um objeto JavaScript
-
-      const lastUserId = users[users.length - 1].id; // pega o último id da lista de usuários
-      const newUser = {
-        id: lastUserId + 1, // incrementa o id do último usuário
-        name: body.name,
-      }
-      users.push(newUser);
-
-      response.send(200, newUser); // resposta da requisição com o status 200 e uma mensagem de sucesso
-    })
-  }
+    response.send(200, { id, name });
+  },
 };
