@@ -24,9 +24,32 @@ module.exports = {
     const user = users.find((user) => user.id === Number(id)); // procura o usuário com o id passado na URL
 
     if (!user) {
-      return response.send(400, { error: "User not found" }); // envia a resposta da requisição com o status 400 e uma mensagem de erro
+      return response.send(400, { error: "User not found" }); // envia a resposta da requisição com o status 400 e uma mensagem de erro caso user não seja encontrado
     }
 
     response.send(200, user); // envia a resposta da requisição com o status 200 e o usuário encontrado
   },
+
+  createUser(request, response) {
+    let body = '';
+
+    // criaremos um event listener para o evento data, que é disparado toda vez que um novo chunk de dados é recebido (forma como os dados são enviados no método POST)
+    request.on('data', (chunk) => {
+      body += chunk; // concatena os chunks de dados recebidos
+    });
+
+    // criaremos um event listener para o evento end, que é disparado quando todos os dados foram recebidos da stream
+    request.on('end', () => {
+      body = JSON.parse(body); // manda a string de dados para o JSON.parse para transformá-la em um objeto JavaScript
+
+      const lastUserId = users[users.length - 1].id; // pega o último id da lista de usuários
+      const newUser = {
+        id: lastUserId + 1, // incrementa o id do último usuário
+        name: body.name,
+      }
+      users.push(newUser);
+
+      response.send(200, newUser); // resposta da requisição com o status 200 e uma mensagem de sucesso
+    })
+  }
 };
