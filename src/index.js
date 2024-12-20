@@ -1,13 +1,17 @@
 // Importa o módulo http e url
 const http = require('http');
-const url = require('url');
+// const url = require('url'); deprecated
+const { URL } = require('url');
 
 // importa o arquivo de rotas
 const routes = require('./routes');
 
 // Cria o server
 const server = http.createServer((request, response) => {
-  const parsedUrl = url.parse(request.url, true); // pega a url da requisição e transforma em um objeto dividido em partes. O objeto retornado possui várias propriedades, como pathname, query, path, entre outras. o true no parâmetro faz com que a query string seja transformada em um objeto, facilitando a leitura dos parâmetros passados na URL.
+  const parsedUrl = new URL(`https://localhost:3000${request.url}`); // pega a url da requisição e transforma em um objeto dividido em partes. O objeto retornado possui várias propriedades, como pathname, query, path, entre outras. o true no parâmetro faz com que a query string seja transformada em um objeto, facilitando a leitura dos parâmetros passados na URL.
+  console.log(parsedUrl);
+
+  const searchParams = Object.fromEntries(parsedUrl.searchParams); // transforma o objeto searchParams em um objeto comum, para facilitar a manipulação dos parâmetros passados na URL. (antes era um objeto do tipo URLSearchParams)
 
   console.log(`Request method: ${request.method} | Endpoint: ${request.url}`);
   
@@ -15,7 +19,7 @@ const server = http.createServer((request, response) => {
     routeObj.method === request.method && routeObj.endpoint === parsedUrl.pathname
   ));
   if (route) { // se encontrar o endpoint desejado com o método correto, executa o handler definido no UserController.js
-    request.query = parsedUrl.query; // injeta parsedUrl.query no objeto request, para que o handler possa acessar os parâmetros passados na URL
+    request.query = searchParams; // injeta o objeto query na requisição, para que o controller possa acessar os parâmetros passados na URL
     route.handler(request, response);
   } else {
     response.writeHead(404, { 'Content-Type': 'text/html' });
