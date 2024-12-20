@@ -61,6 +61,22 @@ Retorna uma lista de usuários.
 ]
 ```
 
+### GET /users/:id
+
+Retorna um usuário específico (ou, caso usuário não exista, uma tela de erro 400 (bad request)).
+
+/users/1
+
+**Resposta:**
+```json
+[
+  {
+  "id": 1,
+  "name": "Usuário 1"
+  }
+]
+```
+
 ### POST /users
 
 Adiciona um novo usuário.
