@@ -8,9 +8,9 @@ module.exports = [
     method: 'GET',
     handler: UserController.listUsers, // apenas a referência para a função, sem os parênteses.
   },
-  // { // teste!
-  //   endpoint: '/products',
-  //   method: 'GET',
-  //   handler: UserController.listUsers, // apenas a referência para a função, sem os parênteses.
-  // },
+  {
+    endpoint: '/users/:id',
+    method: 'GET',
+    handler: UserController.getUserById,
+  },
 ]

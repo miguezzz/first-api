@@ -1,7 +1,7 @@
 // Importa o módulo http e url
 const http = require('http');
 // const url = require('url'); deprecated
-const { URL } = require('url');
+const { URL } = require('url'); // forma mais atual de importar o módulo url
 
 // importa o arquivo de rotas
 const routes = require('./routes');
@@ -11,15 +11,29 @@ const server = http.createServer((request, response) => {
   const parsedUrl = new URL(`https://localhost:3000${request.url}`); // pega a url da requisição e transforma em um objeto dividido em partes. O objeto retornado possui várias propriedades, como pathname, query, path, entre outras. o true no parâmetro faz com que a query string seja transformada em um objeto, facilitando a leitura dos parâmetros passados na URL.
   console.log(parsedUrl);
 
-  const searchParams = Object.fromEntries(parsedUrl.searchParams); // transforma o objeto searchParams em um objeto comum, para facilitar a manipulação dos parâmetros passados na URL. (antes era um objeto do tipo URLSearchParams)
+  let { pathname } = parsedUrl; // pega o pathname da URL (sem os query params)
+  let id = null; // inicializa a variável id com null
+  
+  // divide o pathname em um array, separando cada parte da URL pelas / e removendo os espaços vazios (o Boolean é utilizado para remover os itens vazios do array (truthy e falsy values))
+  const splitEndpoint = pathname.split('/').filter(Boolean);
+  console.log(splitEndpoint);
+
+  if (splitEndpoint.length > 1) {
+    pathname = `/${splitEndpoint[0]}/:id`; // se o array splitEndpoint tiver mais de um item, a rota é do tipo /users/:id
+    id = splitEndpoint[1]; // o id é o segundo item do array splitEndpoint
+  }
+
+  const searchParams = Object.fromEntries(parsedUrl.searchParams); // transforma o objeto searchParams em um objeto comum, para facilitar a manipulação dos parâmetros passados na URL. (antes era um objeto do tipo URLSearchParams)7
 
   console.log(`Request method: ${request.method} | Endpoint: ${request.url}`);
   
   const route = routes.find((routeObj) => ( // vai varrer o array de objetos em busca da rota desejada
-    routeObj.method === request.method && routeObj.endpoint === parsedUrl.pathname
+    routeObj.method === request.method && routeObj.endpoint === pathname
   ));
   if (route) { // se encontrar o endpoint desejado com o método correto, executa o handler definido no UserController.js
     request.query = searchParams; // injeta o objeto query na requisição, para que o controller possa acessar os parâmetros passados na URL
+    request.params = { id }; // injeta o objeto params na requisição, para que o controller possa acessar o id passado na URL (params é para organização, pois o id poderia ser passado diretamente na requisição)
+
     route.handler(request, response);
   } else {
     response.writeHead(404, { 'Content-Type': 'text/html' });

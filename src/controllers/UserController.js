@@ -17,5 +17,19 @@ module.exports = {
 
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end(JSON.stringify(sortedUsers)); // transforma o array de objetos em uma string, pois o método end só aceita string ou buffer
+  },
+
+  getUserById(request, response) {
+    const { id } = request.params; // pega o id passado na URL
+
+    const user = users.find((user) => user.id === Number(id)); // procura o usuário com o id passado na URL
+
+    if (user) {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ user }));
+    } else {
+      response.writeHead(400, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "User not found" }));
+    }    
   }
-}
+} 
