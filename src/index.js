@@ -3,6 +3,7 @@ const http = require('http');
 // const url = require('url'); deprecated
 const { URL } = require('url'); // forma mais atual de importar o módulo url
 
+const bodyParser = require('./helpers/bodyParser');
 // importa o arquivo de rotas
 const routes = require('./routes');
 
@@ -23,7 +24,7 @@ const server = http.createServer((request, response) => {
     id = splitEndpoint[1]; // o id é o segundo item do array splitEndpoint
   }
 
-  const searchParams = Object.fromEntries(parsedUrl.searchParams); // transforma o objeto searchParams em um objeto comum, para facilitar a manipulação dos parâmetros passados na URL. (antes era um objeto do tipo URLSearchParams)7
+  const searchParams = Object.fromEntries(parsedUrl.searchParams); // transforma o objeto searchParams em um objeto comum, para facilitar a manipulação dos parâmetros passados na URL. (antes era um objeto do tipo URLSearchParams)
 
   console.log(`Request method: ${request.method} | Endpoint: ${request.url}`);
   
@@ -40,7 +41,11 @@ const server = http.createServer((request, response) => {
       response.end(JSON.stringify(body)); // transforma o objeto em uma string, pois o método end só aceita string ou buffer
     };
 
-    route.handler(request, response);
+    if (['POST', 'PUT', 'PATCH'].includes(request.method)) {
+      bodyParser(request, () => route.handler(request, response)); // passa o handler como callback de bodyParser, para que o handler só seja executado após o body ser parseado
+    } else {
+      route.handler(request, response); // executa o handler
+    }
   } else {
     response.writeHead(404, { 'Content-Type': 'text/html' });
     response.end(`Cannot ${request.method} ${request.url}`);

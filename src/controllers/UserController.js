@@ -57,9 +57,11 @@ module.exports = {
       response.send(400, { error: "User not found" });
     }
 
-    users = users.map((user) => { // para cada usuário, verifica se o id é igual ao id passado na URL.
+    users = users.map((user) => {
+      // para cada usuário, verifica se o id é igual ao id passado na URL.
       if (user.id === id) {
-        return { // se for igual, retorna um novo objeto com o id e o name atualizado
+        return {
+          // se for igual, retorna um novo objeto com o id e o name atualizado
           ...user, // spread operator para manter as propriedades do usuário
           name, // atualiza o name
         };
@@ -68,6 +70,16 @@ module.exports = {
       return user; // se não for igual, retorna o usuário sem alterações
     });
 
-    response.send(200, { id, name });
+    response.send(200, { id, name }); // retorna para o usuário o id e o name atualizado
+  },
+
+  deleteUser(request, response) {
+    let { id } = request.params;
+
+    id = Number(id);
+
+    users = users.filter((user) => user.id !== id);
+
+    response.send(200, { deleted: true });
   },
 };
