@@ -34,6 +34,12 @@ const server = http.createServer((request, response) => {
     request.query = searchParams; // injeta o objeto query na requisição, para que o controller possa acessar os parâmetros passados na URL
     request.params = { id }; // injeta o objeto params na requisição, para que o controller possa acessar o id passado na URL (params é para organização, pois o id poderia ser passado diretamente na requisição)
 
+    // injeta o método send no objeto response, para que o controller possa chamar o método send e enviar a resposta da requisição, tirando a responsabilidade do controller
+    response.send = (statusCode, body) => {
+      response.writeHead(statusCode, { 'Content-Type': 'application/json' }); // define o status code e o tipo de conteúdo da resposta
+      response.end(JSON.stringify(body)); // transforma o objeto em uma string, pois o método end só aceita string ou buffer
+    };
+
     route.handler(request, response);
   } else {
     response.writeHead(404, { 'Content-Type': 'text/html' });

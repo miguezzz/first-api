@@ -1,6 +1,6 @@
 // a regra de negócio da aplicação foi transferida para o arquivo UserController.js, que agora é responsável por lidar com as requisições e respostas da aplicação. O arquivo index.js agora é responsável apenas por criar o servidor e escutar a porta 3000.
 
-const users = require('../mocks/users');
+const users = require("../mocks/users");
 
 module.exports = {
   listUsers(request, response) {
@@ -8,15 +8,14 @@ module.exports = {
     const { order } = request.query; // pega o parâmetro order da query string da URL
 
     const sortedUsers = users.sort((a, b) => {
-      if (order === 'desc') {
+      if (order === "desc") {
         return a.id < b.id ? 1 : -1; // se o parâmetro order for desc, a ordenação será do maior para o menor (descendente). Se a.id for menor que b.id, retorna 1 (a.id troca de posição com b.id). Se não, retorna -1 (a.id não troca de posição com b.id).
       }
 
       return a.id > b.id ? 1 : -1;
-    })
+    });
 
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(sortedUsers)); // transforma o array de objetos em uma string, pois o método end só aceita string ou buffer
+    response.send(200, sortedUsers); // envia a resposta da requisição com o status 200 e o array de usuários ordenado
   },
 
   getUserById(request, response) {
@@ -24,12 +23,10 @@ module.exports = {
 
     const user = users.find((user) => user.id === Number(id)); // procura o usuário com o id passado na URL
 
-    if (user) {
-      response.writeHead(200, { "Content-Type": "application/json" });
-      response.end(JSON.stringify({ user }));
-    } else {
-      response.writeHead(400, { "Content-Type": "application/json" });
-      response.end(JSON.stringify({ error: "User not found" }));
-    }    
-  }
-} 
+    if (!user) {
+      return response.send(400, { error: "User not found" }); // envia a resposta da requisição com o status 400 e uma mensagem de erro
+    }
+
+    response.send(200, user); // envia a resposta da requisição com o status 200 e o usuário encontrado
+  },
+};
